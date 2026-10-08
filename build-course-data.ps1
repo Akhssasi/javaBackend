@@ -30,7 +30,7 @@ $Courses = @(
         file     = 'java-backend-course v2.md'
         title    = 'Java Backend Development (Expanded Edition)'
         subtitle = 'An expanded A-to-H path: environment setup, core Java, engineering tools, web foundations, Spring Boot, a finished portfolio project, job preparation and working effectively with AI.'
-        accent   = '#45d9c0'
+        accent   = '#3fb950'
     },
     [pscustomobject]@{
         id       = 'troubleshooting'

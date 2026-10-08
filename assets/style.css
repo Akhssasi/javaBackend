@@ -4,20 +4,20 @@
    ============================================================ */
 
 :root {
-  --bg: #0b1020;
-  --bg-soft: #0f1630;
-  --surface: #131b38;
-  --surface-2: #182246;
-  --border: #263056;
-  --text: #e7ebff;
-  --text-dim: #9aa5cf;
+  --bg: #0d1117;
+  --bg-soft: #090c10;
+  --surface: #161b22;
+  --surface-2: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
   --accent: #ff9f43;
-  --accent-2: #45d9c0;
+  --accent-2: #58a6ff;
   --accent-ink: #1a1005;
-  --danger: #ff6b6b;
-  --ok: #3ddc84;
+  --danger: #f85149;
+  --ok: #3fb950;
   --info: #58a6ff;
-  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
   --radius: 14px;
   --mono: "Cascadia Code", "JetBrains Mono", Consolas, "Courier New", monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,20 +25,20 @@
 }
 
 [data-theme="light"] {
-  --bg: #f4f6fc;
-  --bg-soft: #eceffb;
+  --bg: #ffffff;
+  --bg-soft: #f6f8fa;
   --surface: #ffffff;
-  --surface-2: #f1f3fb;
-  --border: #d9deee;
-  --text: #1c2340;
-  --text-dim: #5c6690;
-  --accent: #d97706;
-  --accent-2: #0d9488;
-  --accent-ink: #fff8ec;
-  --danger: #d64545;
-  --ok: #148a4b;
-  --info: #2563eb;
-  --shadow: 0 8px 24px rgba(30, 40, 90, .10);
+  --surface-2: #f6f8fa;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --text-dim: #57606a;
+  --accent: #bc4c00;
+  --accent-2: #0969da;
+  --accent-ink: #ffffff;
+  --danger: #cf222e;
+  --ok: #1a7f37;
+  --info: #0969da;
+  --shadow: 0 8px 24px rgba(31, 35, 40, .10);
 }
 
 * { box-sizing: border-box; }
@@ -50,7 +50,7 @@ body {
   font-family: var(--sans);
   background:
     radial-gradient(1000px 500px at 85% -10%, rgba(255, 159, 67, .10), transparent 60%),
-    radial-gradient(900px 420px at -10% 20%, rgba(69, 217, 192, .08), transparent 55%),
+    radial-gradient(900px 420px at -10% 20%, rgba(88, 166, 255, .10), transparent 55%),
     var(--bg);
   color: var(--text);
   line-height: 1.65;
@@ -846,7 +846,7 @@ article.course details[open] > summary::before { content: "\25BE  "; }
 article.course details > *:not(summary) { margin-top: 8px; }
 
 article.course details.quiz {
-  border-color: rgba(69, 217, 192, .55);
+  border-color: rgba(88, 166, 255, .55);
   background: color-mix(in srgb, var(--surface) 88%, var(--accent-2) 12%);
 }
 article.course details.quiz summary { color: var(--accent-2); }
