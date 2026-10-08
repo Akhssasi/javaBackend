@@ -204,8 +204,7 @@
       '<span class="cb-lang">' + esc(label) + '</span>' +
       '<span class="cb-spacer"></span>' +
       '<button class="cb-copy" type="button" aria-label="Copy code">' +
-      '<svg class="cb-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">' +
-      '<path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>' +
+      '<i class="fa-regular fa-copy cb-ico" aria-hidden="true"></i>' +
       '<span class="cb-label">Copy</span></button>' +
       '</div>' +
       '<div class="code-body">' +
@@ -224,10 +223,16 @@
     return 'note';
   }
 
+  var EMOJI_LEAD = /^(?:[\u2190-\u21FF\u2300-\u27BF\u2B00-\u2BFF\uFE0F\u200D]|[\uD83C-\uD83F][\uDC00-\uDFFF])+\s*/;
+
   function renderBlockquote(lines) {
     var raw = lines.join('\n');
     var cls = calloutClass(raw);
-    return '<blockquote class="callout ' + cls + '">' + renderBlocks(lines) + '</blockquote>';
+    var cleaned = lines.slice();
+    for (var k = 0; k < cleaned.length; k++) {
+      if (cleaned[k].trim()) { cleaned[k] = cleaned[k].replace(EMOJI_LEAD, ''); break; }
+    }
+    return '<blockquote class="callout ' + cls + '">' + renderBlocks(cleaned) + '</blockquote>';
   }
 
   function detailsClass(summary) {
@@ -510,10 +515,16 @@
       if (!codeEl) return;
       var text = codeEl.textContent;
       var label = btn.querySelector('.cb-label') || btn;
+      var ico = btn.querySelector('.cb-ico');
       function done() {
         label.textContent = 'Copied';
+        if (ico) ico.className = 'fa-solid fa-check cb-ico';
         btn.classList.add('copied');
-        setTimeout(function () { label.textContent = 'Copy'; btn.classList.remove('copied'); }, 1400);
+        setTimeout(function () {
+          label.textContent = 'Copy';
+          if (ico) ico.className = 'fa-regular fa-copy cb-ico';
+          btn.classList.remove('copied');
+        }, 1400);
       }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
@@ -554,11 +565,20 @@
   function initTheme() {
     var saved = lsGet('jp_theme');
     if (saved) document.documentElement.setAttribute('data-theme', saved);
+    function paint() {
+      var light = document.documentElement.getAttribute('data-theme') === 'light';
+      $$('.theme-toggle').forEach(function (btn) {
+        var i = btn.querySelector('i');
+        if (i) i.className = 'fa-solid ' + (light ? 'fa-sun' : 'fa-moon');
+      });
+    }
+    paint();
     $$('.theme-toggle').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', cur);
         lsSet('jp_theme', cur);
+        paint();
       });
     });
   }
@@ -679,7 +699,7 @@
     if (resume && last && courseById(last.c)) {
       resume.href = 'lesson.html?c=' + encodeURIComponent(last.c) + '&s=' + last.s;
       resume.style.display = '';
-      resume.textContent = '\u25B6 Resume: ' + last.t.slice(0, 34) + (last.t.length > 34 ? '\u2026' : '');
+      resume.innerHTML = '<i class="fa-solid fa-circle-play"></i> Resume: ' + esc(last.t.slice(0, 34)) + (last.t.length > 34 ? '\u2026' : '');
     }
     var start = document.getElementById('btn-start');
     if (start) {
@@ -991,7 +1011,7 @@
       out += '<a class="nav-item' + (i === activeIdx ? ' active' : '') + (done ? ' done' : '') + (isBookmarked(course, i) ? ' bookmarked' : '') +
         '" href="lesson.html?c=' + encodeURIComponent(course.id) + '&s=' + i + '">' +
         '<span class="n">' + esc(label) + '</span><span class="t">' + esc(cleanTitle(s.title)) + '</span>' +
-        (isBookmarked(course, i) ? '<span class="nav-star" title="Bookmarked">\u2605</span>' : '') + '</a>';
+        (isBookmarked(course, i) ? '<span class="nav-star" title="Bookmarked"><i class="fa-solid fa-bookmark"></i></span>' : '') + '</a>';
     });
     return out;
   }
@@ -1028,7 +1048,9 @@
     function paint() {
       var done = isDone(course, idx);
       btn.classList.toggle('done', done);
-      btn.textContent = done ? '\u2713 Completed' : 'Mark as complete';
+      btn.innerHTML = done
+        ? '<i class="fa-solid fa-circle-check"></i> Completed'
+        : '<i class="fa-regular fa-circle-check"></i> Mark as complete';
     }
     paint();
     btn.addEventListener('click', function () {
@@ -1052,13 +1074,13 @@
       var pr = document.createElement('button');
       pr.type = 'button';
       pr.className = 'btn btn-ghost tool-btn';
-      pr.innerHTML = '\uD83D\uDDA8\uFE0F Print / PDF';
+      pr.innerHTML = '<i class="fa-solid fa-print"></i> Print / PDF';
       pr.addEventListener('click', function () { window.print(); });
 
       function paint() {
         var on = isBookmarked(course, idx);
         bm.classList.toggle('bookmarked', on);
-        bm.innerHTML = (on ? '\u2605' : '\u2606') + ' ' + (on ? 'Bookmarked' : 'Bookmark');
+        bm.innerHTML = (on ? '<i class="fa-solid fa-bookmark"></i> Bookmarked' : '<i class="fa-regular fa-bookmark"></i> Bookmark');
       }
       bm.addEventListener('click', function () {
         var on = toggleBookmark(course, idx);
@@ -1071,7 +1093,7 @@
           var sp = document.createElement('span');
           sp.className = 'nav-star';
           sp.title = 'Bookmarked';
-          sp.textContent = '\u2605';
+          sp.innerHTML = '<i class="fa-solid fa-bookmark"></i>';
           ni.appendChild(sp);
         } else if (!on && ex) {
           ex.parentNode.removeChild(ex);
@@ -1088,7 +1110,7 @@
       var notes = document.createElement('div');
       notes.className = 'lesson-notes';
       notes.innerHTML =
-        '<div class="ln-head"><h3>\uD83D\uDCDD My notes</h3>' +
+        '<div class="ln-head"><h3><i class="fa-solid fa-note-sticky"></i> My notes</h3>' +
         '<span class="ln-status">Saved in this browser</span></div>' +
         '<textarea id="ln-text" placeholder="Write your own notes for this section\u2026 they stay on this device."></textarea>';
       body.parentNode.insertBefore(notes, body.nextSibling);
@@ -1098,10 +1120,10 @@
       var t = null;
       ta.addEventListener('input', function () {
         clearTimeout(t);
-        status.textContent = 'Saving\u2026';
+        status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving\u2026';
         t = setTimeout(function () {
           saveNote(course, idx, ta.value);
-          status.textContent = 'Saved \u2713';
+          status.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
         }, 400);
       });
     }
@@ -1121,7 +1143,7 @@
     trigger.type = 'button';
     trigger.className = 'icon-btn search-open';
     trigger.setAttribute('aria-label', 'Search all lessons');
-    trigger.innerHTML = '\uD83D\uDD0D';
+    trigger.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>';
     if (nav) nav.insertBefore(trigger, nav.firstChild);
     else { var h = $('.site-header'); if (h) h.appendChild(trigger); }
 
@@ -1131,7 +1153,7 @@
     modal.innerHTML =
       '<div class="sm-backdrop"></div>' +
       '<div class="sm-panel" role="dialog" aria-modal="true" aria-label="Search lessons">' +
-      '<div class="sm-bar"><span>\uD83D\uDD0D</span>' +
+      '<div class="sm-bar"><span><i class="fa-solid fa-magnifying-glass"></i></span>' +
       '<input id="sm-input" type="search" placeholder="Search every lesson\u2026 try &quot;JWT&quot;, &quot;@Transactional&quot;, &quot;N+1&quot;" autocomplete="off">' +
       '<kbd>Esc</kbd></div>' +
       '<div class="sm-meta" id="sm-meta"></div>' +

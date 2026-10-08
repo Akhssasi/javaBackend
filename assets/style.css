@@ -55,6 +55,9 @@ body {
   color: var(--text);
   line-height: 1.65;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 a { color: var(--accent-2); text-decoration: none; }
@@ -148,6 +151,10 @@ code {
   transition: transform .12s ease, background .12s ease;
 }
 .icon-btn:hover { background: var(--surface-2); transform: translateY(-1px); }
+.icon-btn i { pointer-events: none; }
+.header-nav a i { margin-right: 6px; font-size: .9em; }
+
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
 
 .hamburger { display: none; }
 
@@ -256,6 +263,7 @@ main {
 }
 .stat b { display: block; font-size: 1.35rem; color: var(--accent-2); }
 .stat span { font-size: .82rem; color: var(--text-dim); }
+.stat span i { color: var(--accent); margin-right: 5px; }
 
 /* ---------------- progress + search ---------------- */
 
@@ -785,18 +793,34 @@ article.course pre code {
 
 article.course blockquote.callout {
   margin: 16px 0;
-  padding: 12px 16px;
+  padding: 13px 18px 13px 46px;
   border-radius: 10px;
   border-left: 4px solid var(--info);
   background: var(--surface);
   color: var(--text);
   font-size: .95rem;
+  position: relative;
 }
+article.course blockquote.callout::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  left: 17px;
+  top: 11px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+article.course blockquote.callout.note::before { content: "\f05a"; color: var(--info); }
 article.course blockquote.callout.warning { border-left-color: var(--danger); }
+article.course blockquote.callout.warning::before { content: "\f071"; color: var(--danger); }
 article.course blockquote.callout.tip { border-left-color: var(--ok); }
+article.course blockquote.callout.tip::before { content: "\f0eb"; color: var(--ok); }
 article.course blockquote.callout.security { border-left-color: var(--accent); }
+article.course blockquote.callout.security::before { content: "\f3ed"; color: var(--accent); }
 article.course blockquote.callout.prod { border-left-color: var(--accent-2); }
+article.course blockquote.callout.prod::before { content: "\f275"; color: var(--accent-2); }
 article.course blockquote.callout.concept { border-left-color: var(--info); }
+article.course blockquote.callout.concept::before { content: "\f08d"; color: var(--info); }
 article.course blockquote { margin: 16px 0; padding: 10px 16px; border-left: 3px solid var(--border); color: var(--text-dim); }
 
 /* ---- tables ---- */
@@ -841,8 +865,17 @@ article.course details summary {
   list-style: none;
 }
 article.course details summary::-webkit-details-marker { display: none; }
-article.course details summary::before { content: "\25B8  "; color: var(--accent); }
-article.course details[open] > summary::before { content: "\25BE  "; }
+article.course details summary::before {
+  content: "\f054";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: .72em;
+  color: var(--accent);
+  margin-right: 9px;
+  display: inline-block;
+  transition: transform .15s ease;
+}
+article.course details[open] > summary::before { content: "\f078"; }
 article.course details > *:not(summary) { margin-top: 8px; }
 
 article.course details.quiz {
@@ -955,7 +988,7 @@ body.no-scroll { overflow: hidden; }
   border-bottom: 1px solid var(--border);
   background: var(--surface-2);
 }
-.sm-bar span { color: var(--text-dim); }
+.sm-bar span { color: var(--text-dim); display: inline-flex; align-items: center; font-size: 1.05rem; }
 .sm-bar input {
   flex: 1;
   border: 0;
