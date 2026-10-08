@@ -195,11 +195,23 @@
   function codeBlockHTML(code, info) {
     var lang = (info || '').split(/\s+/)[0].toLowerCase();
     var label = lang || 'text';
+    var lineCount = code.split('\n').length;
+    var nums = '';
+    for (var ln = 1; ln <= lineCount; ln++) nums += (ln > 1 ? '\n' : '') + ln;
     return '<div class="codeblock">' +
-      '<div class="code-head"><span class="cb-lang">' + esc(label) + '</span>' +
+      '<div class="code-head">' +
+      '<span class="cb-dots" aria-hidden="true"><i class="dot dot-r"></i><i class="dot dot-y"></i><i class="dot dot-g"></i></span>' +
+      '<span class="cb-lang">' + esc(label) + '</span>' +
       '<span class="cb-spacer"></span>' +
-      '<button class="cb-copy" type="button">Copy</button></div>' +
+      '<button class="cb-copy" type="button" aria-label="Copy code">' +
+      '<svg class="cb-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">' +
+      '<path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>' +
+      '<span class="cb-label">Copy</span></button>' +
+      '</div>' +
+      '<div class="code-body">' +
+      '<div class="ln-gutter" aria-hidden="true">' + nums + '</div>' +
       '<pre class="code" data-lang="' + esc(label) + '"><code>' + highlight(code, lang) + '</code></pre>' +
+      '</div>' +
       '</div>';
   }
 
@@ -497,10 +509,11 @@
       var codeEl = block && block.querySelector('pre code');
       if (!codeEl) return;
       var text = codeEl.textContent;
+      var label = btn.querySelector('.cb-label') || btn;
       function done() {
-        btn.textContent = 'Copied';
+        label.textContent = 'Copied';
         btn.classList.add('copied');
-        setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1400);
+        setTimeout(function () { label.textContent = 'Copy'; btn.classList.remove('copied'); }, 1400);
       }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
