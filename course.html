@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Course &middot; JavaPath</title>
+  <meta name="description" content="Browse the modules and sections of a JavaPath course.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23ff9f43'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='900' text-anchor='middle' fill='%231a1005'>JP</text></svg>">
+</head>
+<body data-page="course">
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">JP</span>
+      <span>JavaPath<small>beginner &rarr; job-ready backend</small></span>
+    </a>
+    <div class="header-spacer"></div>
+    <nav class="header-nav">
+      <a href="index.html" class="hide-mobile">&#127968; Dashboard</a>
+      <button class="icon-btn theme-toggle" type="button" aria-label="Toggle theme">&#127769;</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="crumb">
+      <a href="index.html">Dashboard</a>
+      <span>&rsaquo;</span>
+      <span id="course-crumb">Course</span>
+    </div>
+
+    <div class="article-head">
+      <span class="brand-mark" id="course-mark" style="width:46px;height:46px;font-size:1.05rem">JP</span>
+      <div style="flex:1;min-width:220px">
+        <h1 id="course-title" style="margin:0 0 6px">Loading&hellip;</h1>
+        <p id="course-subtitle" style="margin:0;color:var(--text-dim)"></p>
+      </div>
+    </div>
+
+    <section class="panel" style="margin-top:16px">
+      <div class="progress-head">
+        <span id="course-meta">-</span>
+        <span id="course-progress-text"><b>0 / 0</b> sections completed</span>
+      </div>
+      <div class="bar"><i id="course-prog-fill"></i></div>
+    </section>
+
+    <div id="course-body">
+      <div class="empty">Loading course&hellip;</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    JavaPath &middot; progress saved locally &middot; <span id="year"></span>
+  </footer>
+
+  <noscript><div class="empty">This platform needs JavaScript to render the courses.</div></noscript>
+
+  <script src="assets/course-data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

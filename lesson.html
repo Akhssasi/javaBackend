@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson &middot; JavaPath</title>
+  <meta name="description" content="Read a lesson from a JavaPath course.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23ff9f43'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='900' text-anchor='middle' fill='%231a1005'>JP</text></svg>">
+</head>
+<body data-page="lesson">
+
+  <header class="site-header">
+    <button id="hamburger" class="icon-btn hamburger" type="button" aria-label="Open menu">&#9776;</button>
+    <a class="brand" href="index.html">
+      <span class="brand-mark">JP</span>
+      <span>JavaPath<small>beginner &rarr; job-ready backend</small></span>
+    </a>
+    <div class="header-spacer"></div>
+    <nav class="header-nav">
+      <a href="index.html" class="hide-mobile">&#127968; Dashboard</a>
+      <button class="icon-btn theme-toggle" type="button" aria-label="Toggle theme">&#127769;</button>
+    </nav>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <select class="course-select" id="course-select" aria-label="Choose a course"></select>
+      <div class="searchbox">
+        <span>&#128269;</span>
+        <input id="nav-filter" type="search" placeholder="Filter sections&hellip;" autocomplete="off">
+      </div>
+      <nav id="sidebar-nav">
+        <div class="empty">Loading&hellip;</div>
+      </nav>
+    </aside>
+
+    <div class="content">
+      <div class="crumb">
+        <a href="index.html">Dashboard</a>
+        <span>&rsaquo;</span>
+        <a id="crumb-course" href="index.html">Course</a>
+        <span>&rsaquo;</span>
+        <span id="crumb-title">Lesson</span>
+      </div>
+
+      <div class="article-head">
+        <h1 id="article-title">Loading&hellip;</h1>
+        <button id="btn-complete" class="btn btn-ghost complete-btn" type="button" style="display:none">Mark as complete</button>
+      </div>
+
+      <div id="article-body">
+        <div class="empty">Rendering lesson&hellip;</div>
+      </div>
+
+      <nav class="pager" id="pager"></nav>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    JavaPath &middot; progress saved locally &middot; <span id="year"></span>
+  </footer>
+
+  <noscript><div class="empty">This platform needs JavaScript to render the courses.</div></noscript>
+
+  <script src="assets/course-data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
