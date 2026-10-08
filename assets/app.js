@@ -86,6 +86,28 @@
     try { return JSON.parse(lsGet('jp_last') || 'null'); } catch (e) { return null; }
   }
 
+  /* ------------------------------------------------- bookmarks + notes */
+
+  function getBookmarks() {
+    try { return JSON.parse(lsGet('jp_bookmarks') || '{}'); } catch (e) { return {}; }
+  }
+  function isBookmarked(course, idx) { return !!getBookmarks()[progressKey(course, idx)]; }
+  function toggleBookmark(course, idx) {
+    var b = getBookmarks(), k = progressKey(course, idx);
+    if (b[k]) delete b[k]; else b[k] = 1;
+    lsSet('jp_bookmarks', JSON.stringify(b));
+    return !!b[k];
+  }
+  function getNotes() {
+    try { return JSON.parse(lsGet('jp_notes') || '{}'); } catch (e) { return {}; }
+  }
+  function getNote(course, idx) { return getNotes()[progressKey(course, idx)] || ''; }
+  function saveNote(course, idx, text) {
+    var n = getNotes(), k = progressKey(course, idx);
+    if (text && text.trim()) n[k] = text; else delete n[k];
+    lsSet('jp_notes', JSON.stringify(n));
+  }
+
   /* ============================================================
      Markdown -> HTML
      ============================================================ */
@@ -655,6 +677,7 @@
 
     renderCourseGrid();
     renderBrowse();
+    renderBookmarks();
 
     var search = document.getElementById('search');
     if (search) initSearch(search);
@@ -759,6 +782,33 @@
       html += '</div>';
     });
     host.innerHTML = html;
+  }
+
+  function renderBookmarks() {
+    var anchor = document.getElementById('courses');
+    if (!anchor || !anchor.parentNode) return;
+    var existing = document.getElementById('bookmarks-label');
+    if (existing) existing.parentNode.removeChild(existing);
+    var host = document.getElementById('bookmarks');
+    if (host) host.parentNode.removeChild(host);
+
+    var items = [];
+    DATA.forEach(function (c) {
+      c.sections.forEach(function (s, i) { if (isBookmarked(c, i)) items.push(sectionCard(c, i)); });
+    });
+    if (!items.length) return;
+
+    var label = document.createElement('p');
+    label.className = 'section-label';
+    label.id = 'bookmarks-label';
+    label.textContent = 'Your bookmarks (' + items.length + ')';
+    anchor.parentNode.insertBefore(label, anchor);
+
+    var sec = document.createElement('section');
+    sec.id = 'bookmarks';
+    sec.className = 'grid';
+    sec.innerHTML = items.join('');
+    anchor.parentNode.insertBefore(sec, anchor);
   }
 
   function initSearch(input) {
@@ -895,6 +945,7 @@
     renderSidebar(course, idx);
     renderPager(course, idx);
     initComplete(course, idx);
+    initLessonTools(course, idx);
     saveLast(course, idx);
     initCourseSelect(course);
     scrollToHash();
@@ -924,9 +975,10 @@
       if (s.part !== part) return;
       var label = s._label || partShort(part || '') || String(i + 1);
       var done = isDone(course, i);
-      out += '<a class="nav-item' + (i === activeIdx ? ' active' : '') + (done ? ' done' : '') +
+      out += '<a class="nav-item' + (i === activeIdx ? ' active' : '') + (done ? ' done' : '') + (isBookmarked(course, i) ? ' bookmarked' : '') +
         '" href="lesson.html?c=' + encodeURIComponent(course.id) + '&s=' + i + '">' +
-        '<span class="n">' + esc(label) + '</span><span class="t">' + esc(cleanTitle(s.title)) + '</span></a>';
+        '<span class="n">' + esc(label) + '</span><span class="t">' + esc(cleanTitle(s.title)) + '</span>' +
+        (isBookmarked(course, i) ? '<span class="nav-star" title="Bookmarked">\u2605</span>' : '') + '</a>';
     });
     return out;
   }
@@ -974,10 +1026,153 @@
     });
   }
 
+  function initLessonTools(course, idx) {
+    var head = $('.article-head');
+    if (head) {
+      var actions = document.createElement('div');
+      actions.className = 'article-actions';
+
+      var bm = document.createElement('button');
+      bm.type = 'button';
+      bm.className = 'btn btn-ghost tool-btn';
+
+      var pr = document.createElement('button');
+      pr.type = 'button';
+      pr.className = 'btn btn-ghost tool-btn';
+      pr.innerHTML = '\uD83D\uDDA8\uFE0F Print / PDF';
+      pr.addEventListener('click', function () { window.print(); });
+
+      function paint() {
+        var on = isBookmarked(course, idx);
+        bm.classList.toggle('bookmarked', on);
+        bm.innerHTML = (on ? '\u2605' : '\u2606') + ' ' + (on ? 'Bookmarked' : 'Bookmark');
+      }
+      bm.addEventListener('click', function () {
+        var on = toggleBookmark(course, idx);
+        paint();
+        var ni = $('#sidebar-nav .nav-item.active');
+        if (!ni) return;
+        ni.classList.toggle('bookmarked', on);
+        var ex = ni.querySelector('.nav-star');
+        if (on && !ex) {
+          var sp = document.createElement('span');
+          sp.className = 'nav-star';
+          sp.title = 'Bookmarked';
+          sp.textContent = '\u2605';
+          ni.appendChild(sp);
+        } else if (!on && ex) {
+          ex.parentNode.removeChild(ex);
+        }
+      });
+      paint();
+      actions.appendChild(bm);
+      actions.appendChild(pr);
+      head.appendChild(actions);
+    }
+
+    var body = document.getElementById('article-body');
+    if (body && body.parentNode) {
+      var notes = document.createElement('div');
+      notes.className = 'lesson-notes';
+      notes.innerHTML =
+        '<div class="ln-head"><h3>\uD83D\uDCDD My notes</h3>' +
+        '<span class="ln-status">Saved in this browser</span></div>' +
+        '<textarea id="ln-text" placeholder="Write your own notes for this section\u2026 they stay on this device."></textarea>';
+      body.parentNode.insertBefore(notes, body.nextSibling);
+      var ta = notes.querySelector('#ln-text');
+      var status = notes.querySelector('.ln-status');
+      ta.value = getNote(course, idx);
+      var t = null;
+      ta.addEventListener('input', function () {
+        clearTimeout(t);
+        status.textContent = 'Saving\u2026';
+        t = setTimeout(function () {
+          saveNote(course, idx, ta.value);
+          status.textContent = 'Saved \u2713';
+        }, 400);
+      });
+    }
+  }
+
   function scrollToHash() {
     if (!window.location.hash) return;
     var el = document.getElementById(window.location.hash.slice(1));
     if (el) setTimeout(function () { el.scrollIntoView(); }, 60);
+  }
+
+  /* ====================================================== GLOBAL SEARCH */
+
+  function initGlobalSearch() {
+    var nav = $('.header-nav');
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'icon-btn search-open';
+    trigger.setAttribute('aria-label', 'Search all lessons');
+    trigger.innerHTML = '\uD83D\uDD0D';
+    if (nav) nav.insertBefore(trigger, nav.firstChild);
+    else { var h = $('.site-header'); if (h) h.appendChild(trigger); }
+
+    var modal = document.createElement('div');
+    modal.className = 'search-modal';
+    modal.id = 'search-modal';
+    modal.innerHTML =
+      '<div class="sm-backdrop"></div>' +
+      '<div class="sm-panel" role="dialog" aria-modal="true" aria-label="Search lessons">' +
+      '<div class="sm-bar"><span>\uD83D\uDD0D</span>' +
+      '<input id="sm-input" type="search" placeholder="Search every lesson\u2026 try &quot;JWT&quot;, &quot;@Transactional&quot;, &quot;N+1&quot;" autocomplete="off">' +
+      '<kbd>Esc</kbd></div>' +
+      '<div class="sm-meta" id="sm-meta"></div>' +
+      '<div class="sm-results" id="sm-results"><div class="sm-hint">Type at least 2 characters. Press <kbd>/</kbd> anywhere to open search.</div></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    var input = modal.querySelector('#sm-input');
+    var results = modal.querySelector('#sm-results');
+    var meta = modal.querySelector('#sm-meta');
+
+    function open() {
+      modal.classList.add('open');
+      document.body.classList.add('no-scroll');
+      setTimeout(function () { input.focus(); }, 20);
+    }
+    function close() {
+      modal.classList.remove('open');
+      document.body.classList.remove('no-scroll');
+    }
+    function run() {
+      var q = input.value.trim();
+      if (q.length < 2) {
+        results.innerHTML = '<div class="sm-hint">Type at least 2 characters.</div>';
+        meta.textContent = '';
+        return;
+      }
+      var hits = searchAll(q);
+      meta.textContent = hits.length + ' result' + (hits.length === 1 ? '' : 's') + ' for \u201C' + q + '\u201D';
+      results.innerHTML = hits.length ? hits.slice(0, 60).map(function (h) {
+        return '<a class="result" href="lesson.html?c=' + encodeURIComponent(h.course.id) + '&s=' + h.idx + '">' +
+          '<div class="r-top"><span class="r-course">' + esc(h.course.title) + '</span>' +
+          '<span class="r-title">' + highlightTerm(esc(cleanTitle(h.section.title)), q) + '</span></div>' +
+          '<div class="r-snippet">' + snippetAround(h.text, q) + '</div></a>';
+      }).join('') : '<div class="sm-hint">No matches. Try another term.</div>';
+    }
+
+    trigger.addEventListener('click', open);
+    modal.querySelector('.sm-backdrop').addEventListener('click', close);
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.result')) close();
+    });
+    var timer = null;
+    input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(run, 150); });
+    document.addEventListener('keydown', function (e) {
+      var tag = (e.target.tagName || '').toLowerCase();
+      var typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+      if ((e.key === '/' && !typing) || ((e.ctrlKey || e.metaKey) && (e.key || '').toLowerCase() === 'k')) {
+        e.preventDefault();
+        if (modal.classList.contains('open')) close(); else open();
+      } else if (e.key === 'Escape' && modal.classList.contains('open')) {
+        close();
+      }
+    });
   }
 
   /* ============================================================ BOOT */
@@ -986,11 +1181,15 @@
     loadCourses();
     initTheme();
     bindCopy(document);
+    initGlobalSearch();
     if (PAGE === 'index') initIndex();
     else if (PAGE === 'course') initCourse();
     else if (PAGE === 'lesson') { initDrawer(); initLesson(); initNavFilter(); }
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
+    window.addEventListener('beforeprint', function () {
+      $$('details').forEach(function (d) { if (!d.classList.contains('toc')) d.open = true; });
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
